@@ -32,6 +32,8 @@ const fetchProducts = async () => {
 };
 
 // Fetch products initially and then every hour
+fetchProducts();
+setInterval(fetchProducts, 36);
 
 // Endpoint for autocomplete
 app.get("/autocomplete", (req, res) => {
