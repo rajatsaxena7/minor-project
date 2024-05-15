@@ -14,7 +14,6 @@ const fetchProducts = async () => {
   try {
     const response = await axios.get(apiUrl);
     products = response.data;
-    console.log("Fetched products:", products); // Log fetched products
   } catch (error) {
     console.error("Error fetching products:", error);
   }
@@ -26,20 +25,13 @@ setInterval(fetchProducts, 3600000);
 
 // Endpoint for autocomplete
 app.get("/autocomplete", (req, res) => {
-  const query = req.query.q;
-
-  if (!query) {
-    return res.status(400).json({ error: "Query parameter q is required" });
-  }
-
-  console.log("Received query:", query);
-
-  const lowerCaseQuery = query.toLowerCase();
+  const query = req.query.q.toLowerCase();
   const results = products.filter((product) =>
-    product.name.toLowerCase().includes(lowerCaseQuery)
+    product.name.toLowerCase().includes(query)
   );
-
-  console.log("Filtered results:", results);
-
   res.json(results);
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });
