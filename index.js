@@ -48,6 +48,10 @@ app.get("/autocomplete", (req, res) => {
     product.name.toLowerCase().includes(lowerCaseQuery)
   );
 
+  if (results.length === 0) {
+    return res.json({ message: "No products found" });
+  }
+
   res.json(results);
 });
 
