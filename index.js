@@ -9,7 +9,6 @@ const consumerSecret = "cs_a975ef002226e7b23b85adeeb18cabf1c7d9df9a";
 const apiUrl = `https://srtgroceries.com/wp-json/wc/v3/products?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`;
 
 let products = [];
-let callCounter = 0;
 
 const fetchProducts = async () => {
   let allProducts = [];
@@ -28,14 +27,8 @@ const fetchProducts = async () => {
     }
   } while (fetchedProducts.length > 0);
 
-  // Update the products array
-  if (callCounter % 5 === 0) {
-    products = allProducts;
-    console.log("Updated products:", products.length); // Log the number of updated products
-  }
-
-  callCounter++;
-  console.log("Fetch call count:", callCounter);
+  products = allProducts;
+  console.log("Fetched products:", products.length); // Log the number of fetched products
 };
 
 // Fetch products initially and then every hour
@@ -54,10 +47,6 @@ app.get("/autocomplete", (req, res) => {
   const results = products.filter((product) =>
     product.name.toLowerCase().includes(lowerCaseQuery)
   );
-
-  if (results.length === 0) {
-    return res.json({ message: "No products found" });
-  }
 
   res.json(results);
 });
