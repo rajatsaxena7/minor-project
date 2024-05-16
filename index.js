@@ -1,14 +1,17 @@
 const express = require("express");
 const axios = require("axios");
+const NodeCache = require("node-cache");
 
 const app = express();
 const port = process.env.PORT || 3000; // Use the PORT environment variable if available
 
-const consumerKey = "ck_086b844aceb48a953bd8b8c9ab602bae23223127";
-const consumerSecret = "cs_a975ef002226e7b23b85adeeb18cabf1c7d9df9a";
+const consumerKey =
+  process.env.CONSUMER_KEY || "ck_086b844aceb48a953bd8b8c9ab602bae23223127";
+const consumerSecret =
+  process.env.CONSUMER_SECRET || "cs_a975ef002226e7b23b85adeeb18cabf1c7d9df9a";
 const apiUrl = `https://srtgroceries.com/wp-json/wc/v3/products?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`;
 
-let products = [];
+const productCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 }); // Cache for 1 hour
 
 const fetchProducts = async () => {
   let allProducts = [];
@@ -24,11 +27,12 @@ const fetchProducts = async () => {
     } catch (error) {
       console.error("Error fetching products:", error);
       fetchedProducts = [];
+      break; // Exit the loop on error
     }
   } while (fetchedProducts.length > 0);
 
-  products = allProducts;
-  console.log("Fetched products:", products.length); // Log the number of fetched products
+  productCache.set("products", allProducts);
+  console.log("Fetched products:", allProducts.length); // Log the number of fetched products
 };
 
 // Fetch products initially and then every hour
@@ -43,6 +47,7 @@ app.get("/autocomplete", (req, res) => {
     return res.status(400).json({ error: "Query parameter q is required" });
   }
 
+  const products = productCache.get("products") || [];
   const lowerCaseQuery = query.toLowerCase();
   const results = products.filter((product) =>
     product.name.toLowerCase().includes(lowerCaseQuery)
